@@ -37,40 +37,33 @@ function GeminiAssistant() {
         alert('Copied to clipboard!');
     };
 
-    const handleSave = () => {
-        const blob = new Blob(
-            [`<html><body><h2>Prompt:</h2><p>${prompt}</p><h2>Response:</h2><div>${response}</div></body></html>`],
-            { type: 'text/html' }
-        );
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'prompt_response.html';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     const renderResponse = (text) => {
-        // Check if it's a code block
+        // If it's a code block, display it differently
         if (text.startsWith('```') && text.endsWith('```')) {
             const code = text.slice(3, -3).trim();
             return (
                 <div>
-                    <SyntaxHighlighter language="javascript" style={coy}>
-                        {code}
-                    </SyntaxHighlighter>
-                    <button onClick={() => handleCopy(code)} style={{ marginTop: '10px' }}>Copy Code</button>
+                    <div className="code-block">
+                        <SyntaxHighlighter language="java" style={coy}>
+                            {code}
+                        </SyntaxHighlighter>
+                    </div>
+                    <button onClick={() => handleCopy(code)}>Copy Code</button>
                 </div>
             );
         } else {
-            // Otherwise render as HTML text
-            return (
-                <div
-                    style={{ fontSize: '16px', lineHeight: '1.6' }}
-                    dangerouslySetInnerHTML={{ __html: text }}
-                />
-            );
+            // Otherwise, render as normal HTML
+            return <div className="response-text" dangerouslySetInnerHTML={{ __html: text }} />;
         }
+    };
+
+    const formatResponse = (rawResponse) => {
+        // Apply some HTML formatting to bold text and headings
+        const formattedResponse = rawResponse
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text using **
+            .replace(/`(.*?)`/g, '<code>$1</code>') // Inline code
+            .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>'); // Multiline code blocks
+        return formattedResponse;
     };
 
     return (
@@ -92,8 +85,7 @@ function GeminiAssistant() {
 
             {response && (
                 <div style={styles.response}>
-                    {renderResponse(response)}
-                    <button onClick={handleSave} style={{ marginTop: '15px', backgroundColor: '#3498db' }}>Save as HTML</button>
+                    <div dangerouslySetInnerHTML={{ __html: formatResponse(response) }} />
                 </div>
             )}
         </div>
