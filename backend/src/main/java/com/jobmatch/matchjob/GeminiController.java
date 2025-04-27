@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
+@CrossOrigin(origins ="http://localhost:3000/")
 public class GeminiController {
     private final ChatClient chatClient;
 
@@ -22,7 +23,7 @@ public class GeminiController {
 //    }
 //
     @PostMapping("/prompt")
-    @CrossOrigin(origins ="http://127.0.0.1:5500/")
+
     public ResponseEntity<ChatResponse> handlePrompt(@Valid @RequestBody ChatRequest request) {
         if (request.getPrompt() == null || request.getPrompt().trim().isEmpty()) {
             return ResponseEntity
